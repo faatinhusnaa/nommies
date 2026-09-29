@@ -1,6 +1,8 @@
 # 🍮 nommies (nomnom empire)
 
-A chaotic-good full-stack financial simulator & treat laundering syndicate built because budgeting spreadsheets are depressing. 
+Hello nommies! Welcome to my nommies laundering website. This is just a fun project and it is not that detailed. Have fun nommies!!!
+
+This is a chaotic-good full-stack treat financial simulator & treat laundering syndicate built because budgeting spreadsheets are depressing. 
 
 Instead of index funds, you manage snack capital, calculate sugar deficit runways, hoard pastry reserves, and fight for dominance on the real-time syndicate wire.
 
