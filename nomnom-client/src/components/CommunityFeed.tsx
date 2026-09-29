@@ -19,6 +19,21 @@ interface Post {
   replies?: ReplyItem[];
 }
 
+interface StoryCommentReply {
+  id: string;
+  author: string;
+  text: string;
+  time: string;
+}
+
+interface StoryComment {
+  id: string;
+  author: string;
+  text: string;
+  time: string;
+  replies?: StoryCommentReply[];
+}
+
 interface FlashStory {
   id: string;
   user: string;
@@ -29,10 +44,10 @@ interface FlashStory {
   timestamp: string;
   likes: number;
   reposts: number;
-  comments: { id: string; author: string; text: string; time: string }[];
+  comments: StoryComment[];
 }
 
-const SATIRICAL_TICKER: FlashStory[] = [
+const ALL_FLASH_STORIES: FlashStory[] = [
   {
     id: 'cinna-moon',
     user: 'Cinna',
@@ -45,8 +60,22 @@ const SATIRICAL_TICKER: FlashStory[] = [
     likes: 42,
     reposts: 9,
     comments: [
-      { id: 'c1', author: 'Pompompurin', text: 'Where can I subscribe to the space custard futures?', time: '8m ago' },
-      { id: 'c2', author: 'Kuromi', text: 'Watch your borders. Mischief syndicate scouts are already deployed.', time: '4m ago' },
+      {
+        id: 'c1',
+        author: 'Pompompurin',
+        text: 'Where can I subscribe to the space custard futures?',
+        time: '8m ago',
+        replies: [
+          { id: 'r1', author: 'Cinna', text: 'Presale starts at 3 AM midnight GMT!', time: '6m ago' },
+        ],
+      },
+      {
+        id: 'c2',
+        author: 'Kuromi',
+        text: 'Watch your borders. Mischief syndicate scouts are already deployed.',
+        time: '4m ago',
+        replies: [],
+      },
     ],
   },
   {
@@ -61,7 +90,13 @@ const SATIRICAL_TICKER: FlashStory[] = [
     likes: 89,
     reposts: 31,
     comments: [
-      { id: 'c3', author: 'Hello Kitty', text: 'Sending financial relief baskets of red ribbon cookies ❤️', time: '18m ago' },
+      {
+        id: 'c3',
+        author: 'Hello Kitty',
+        text: 'Sending financial relief baskets of red ribbon cookies ❤️',
+        time: '18m ago',
+        replies: [],
+      },
     ],
   },
   {
@@ -76,8 +111,15 @@ const SATIRICAL_TICKER: FlashStory[] = [
     likes: 120,
     reposts: 58,
     comments: [
-      { id: 'c4', author: 'My Melody', text: 'Let us discuss this over lavender tea first please 🌸', time: '45m ago' },
-      { id: 'c5', author: 'Kuromi', text: 'No settlements. Only empire expansion.', time: '30m ago' },
+      {
+        id: 'c4',
+        author: 'My Melody',
+        text: 'Let us discuss this over lavender tea first please 🌸',
+        time: '45m ago',
+        replies: [
+          { id: 'r2', author: 'Kuromi', text: 'No settlements. Only empire expansion.', time: '30m ago' },
+        ],
+      },
     ],
   },
   {
@@ -92,10 +134,105 @@ const SATIRICAL_TICKER: FlashStory[] = [
     likes: 77,
     reposts: 14,
     comments: [
-      { id: 'c6', author: 'Cinna', text: 'Do the pond lotus chips pair well with whipped dairy?', time: '1h ago' },
+      {
+        id: 'c5',
+        author: 'Cinna',
+        text: 'Do the pond lotus chips pair well with whipped dairy?',
+        time: '1h ago',
+        replies: [],
+      },
+    ],
+  },
+  {
+    id: 'melody-short',
+    user: 'My Melody',
+    text: 'shorted strawberry jam futures to finance a private botanical garden.',
+    tag: 'SHORT',
+    icon: '🐰',
+    fullStory:
+      'My Melody stunned commodity traders by opening massive naked short positions on strawberry preserve contracts, driving down regional pie indices while quietly securing 500 acres of organic mint groves.',
+    timestamp: '35m ago',
+    likes: 64,
+    reposts: 22,
+    comments: [
+      {
+        id: 'c6',
+        author: 'Kuromi',
+        text: 'I taught her well.',
+        time: '20m ago',
+        replies: [],
+      },
+    ],
+  },
+  {
+    id: 'pochacco-energy',
+    user: 'Pochacco',
+    text: 'launched an electrolyte banana milk startup valued at $1.2B.',
+    tag: 'UNICORN',
+    icon: '🐶',
+    fullStory:
+      'Pochacco announced the initial public offering of his performance athletic banana nectar venture. The energy formula promises zero sugar crashes during high-intensity pastry sprints.',
+    timestamp: '4h ago',
+    likes: 110,
+    reposts: 40,
+    comments: [
+      {
+        id: 'c7',
+        author: 'Cinna',
+        text: 'Does it blend with cloud cream?',
+        time: '3h ago',
+        replies: [],
+      },
+    ],
+  },
+  {
+    id: 'batz-sanctions',
+    user: 'Badtz-Maru',
+    text: 'faced antitrust sanctions after monopolizing high-grade sushi rolls.',
+    tag: 'SANCTIONS',
+    icon: '🐧',
+    fullStory:
+      'The International Treat Bureau has imposed severe trade sanctions on Badtz-Maru after an investigation revealed an offshore cartel storing 90% of prime nori sheets and seasoned sushi rice.',
+    timestamp: '5h ago',
+    likes: 95,
+    reposts: 33,
+    comments: [
+      {
+        id: 'c8',
+        author: 'Pompompurin',
+        text: 'Pudding reserves remain unaffected.',
+        time: '2h ago',
+        replies: [],
+      },
+    ],
+  },
+  {
+    id: 'chococat-crypto',
+    user: 'Chococat',
+    text: 'minted BobaCoin on the snack ledger to hedge inflation risks.',
+    tag: 'CRYPTO',
+    icon: '🐱',
+    fullStory:
+      'Chococat deployed a decentralized proof-of-tapioca token backed 1:1 by real brown sugar pearls, sparking frantic liquidity farming across Sanrio tech hubs.',
+    timestamp: '6h ago',
+    likes: 153,
+    reposts: 71,
+    comments: [
+      {
+        id: 'c9',
+        author: 'Keroppi',
+        text: 'Will BobaCoin liquidity pools accept pond flies?',
+        time: '5h ago',
+        replies: [],
+      },
     ],
   },
 ];
+
+const getRandomStories = (count = 4): FlashStory[] => {
+  const shuffled = [...ALL_FLASH_STORIES].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
 
 export const CommunityFeed: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -110,11 +247,16 @@ export const CommunityFeed: React.FC = () => {
   const [replyInput, setReplyInput] = useState<{ [postId: number]: string }>({});
 
   // Flash News Interactive Modal State
-  const [tickerStories, setTickerStories] = useState<FlashStory[]>(SATIRICAL_TICKER);
+  const [tickerStories, setTickerStories] = useState<FlashStory[]>(() => getRandomStories(4));
   const [activeStory, setActiveStory] = useState<FlashStory | null>(null);
   const [storyCommentInput, setStoryCommentInput] = useState('');
   const [userLikedMap, setUserLikedMap] = useState<Record<string, boolean>>({});
   const [userRepostMap, setUserRepostMap] = useState<Record<string, boolean>>({});
+
+  // Nested Comment Reply State
+  const [activeCommentReplyId, setActiveCommentReplyId] = useState<string | null>(null);
+  const [inlineReplyText, setInlineReplyText] = useState<{ [commentId: string]: string }>({});
+  const [expandedReplies, setExpandedReplies] = useState<{ [commentId: string]: boolean }>({});
 
   const currentUser = (() => {
     try {
@@ -162,7 +304,6 @@ export const CommunityFeed: React.FC = () => {
     };
   }, []);
 
-  // Handle Post Creation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
@@ -192,7 +333,6 @@ export const CommunityFeed: React.FC = () => {
     }
   };
 
-  // Handle Upvote / Downvote
   const handleVote = async (postId: number, direction: 'up' | 'down') => {
     const delta = direction === 'up' ? 1 : -1;
 
@@ -214,7 +354,6 @@ export const CommunityFeed: React.FC = () => {
     }
   };
 
-  // Submit Reply to Live Post
   const handleSubmitReply = async (postId: number) => {
     const text = replyInput[postId]?.trim();
     if (!text) return;
@@ -233,7 +372,6 @@ export const CommunityFeed: React.FC = () => {
     }
   };
 
-  // Flash News Interactive Handlers
   const handleToggleStoryLike = (storyId: string) => {
     const hasLiked = !!userLikedMap[storyId];
     setUserLikedMap((prev) => ({ ...prev, [storyId]: !hasLiked }));
@@ -266,15 +404,17 @@ export const CommunityFeed: React.FC = () => {
     }
   };
 
+  // Add top-level comment to active news dossier
   const handleAddStoryComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!storyCommentInput.trim() || !activeStory) return;
 
-    const newComment = {
+    const newComment: StoryComment = {
       id: `comm_${Date.now()}`,
       author: currentUser.name || 'Executive Tycoon',
       text: storyCommentInput.trim(),
       time: 'Just now',
+      replies: [],
     };
 
     const updatedComments = [...activeStory.comments, newComment];
@@ -284,6 +424,43 @@ export const CommunityFeed: React.FC = () => {
     );
     setActiveStory((prev) => (prev ? { ...prev, comments: updatedComments } : null));
     setStoryCommentInput('');
+  };
+
+  // Add direct nested reply beneath a specific comment
+  const handleAddNestedReply = (commentId: string) => {
+    const replyText = inlineReplyText[commentId]?.trim();
+    if (!replyText || !activeStory) return;
+
+    const newNestedReply: StoryCommentReply = {
+      id: `rep_${Date.now()}`,
+      author: currentUser.name || 'Executive Tycoon',
+      text: replyText,
+      time: 'Just now',
+    };
+
+    const updatedComments = activeStory.comments.map((comm) => {
+      if (comm.id === commentId) {
+        return {
+          ...comm,
+          replies: [...(comm.replies || []), newNestedReply],
+        };
+      }
+      return comm;
+    });
+
+    setTickerStories((prev) =>
+      prev.map((s) => (s.id === activeStory.id ? { ...s, comments: updatedComments } : s))
+    );
+    setActiveStory((prev) => (prev ? { ...prev, comments: updatedComments } : null));
+
+    // Clear input & auto-expand this comment's replies
+    setInlineReplyText((prev) => ({ ...prev, [commentId]: '' }));
+    setActiveCommentReplyId(null);
+    setExpandedReplies((prev) => ({ ...prev, [commentId]: true }));
+  };
+
+  const toggleExpandReplies = (commentId: string) => {
+    setExpandedReplies((prev) => ({ ...prev, [commentId]: !prev[commentId] }));
   };
 
   return (
@@ -316,26 +493,37 @@ export const CommunityFeed: React.FC = () => {
 
       {/* Satirical Wire Bar with Clickable Cards */}
       <div className="bg-[#fff8fa] border border-[#f9d7df] rounded-2xl p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] bg-[#a11635] text-white font-extrabold px-2 py-0.5 rounded-full">
-            FLASH NEWS
-          </span>
-          <span className="text-[11px] font-bold text-gray-500">
-            Live Sanrio Empire Broadcast
-          </span>
-          <span className="text-[10px] text-gray-400 italic hidden sm:inline">
-            (Click any wire to inspect full dossier)
-          </span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] bg-[#a11635] text-white font-extrabold px-2 py-0.5 rounded-full">
+              FLASH NEWS
+            </span>
+            <span className="text-[11px] font-bold text-gray-500">
+              Live Sanrio Empire Broadcast
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTickerStories(getRandomStories(4))}
+            className="text-[11px] font-bold text-[#a11635] hover:underline flex items-center gap-1 cursor-pointer transition"
+          >
+            <span>🔄</span> Refresh Wires
+          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {tickerStories.map((item) => (
             <div
               key={item.id}
-              onClick={() => setActiveStory(item)}
+              onClick={() => {
+                setActiveStory(item);
+                setActiveCommentReplyId(null);
+              }}
               className="p-2.5 bg-white hover:bg-[#fff0f4] rounded-xl flex items-center justify-between gap-2.5 border border-[#fce7ed] hover:border-[#a11635] text-xs cursor-pointer transition group shadow-2xs"
             >
               <div className="flex items-center gap-2.5 min-w-0 pr-1">
-                <span className="text-lg shrink-0 group-hover:scale-110 transition-transform">{item.icon}</span>
+                <span className="text-lg shrink-0 group-hover:scale-110 transition-transform">
+                  {item.icon}
+                </span>
                 <div className="truncate text-gray-700">
                   <span className="font-bold text-[#a11635]">{item.user}: </span>
                   {item.text}
@@ -397,7 +585,6 @@ export const CommunityFeed: React.FC = () => {
                 key={post.id}
                 className="bg-[#fffcfd] border border-[#f8d7df] rounded-2xl p-4 transition hover:shadow-xs space-y-2.5"
               >
-                {/* Header: Title + Author Tag */}
                 <div className="flex justify-between items-start gap-2">
                   <div>
                     <h4 className="font-bold text-xs text-gray-800">{post.title}</h4>
@@ -410,9 +597,7 @@ export const CommunityFeed: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Actions Bar: Voting + Reply Toggle */}
                 <div className="flex items-center gap-3 pt-2 border-t border-[#fff0f3] text-xs">
-                  {/* Upvote / Downvote Pill */}
                   <div className="flex items-center bg-[#fff5f7] border border-[#fcd5de] rounded-xl px-2 py-0.5 gap-1.5 shadow-2xs">
                     <button
                       type="button"
@@ -435,7 +620,6 @@ export const CommunityFeed: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Reply Button */}
                   <button
                     type="button"
                     onClick={() =>
@@ -447,7 +631,6 @@ export const CommunityFeed: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Expandable Replies Drawer */}
                 {activeReplyId === post.id && (
                   <div className="pt-2 pl-3 border-l-2 border-[#fcd5de] space-y-2">
                     {post.replies && post.replies.length > 0 ? (
@@ -468,7 +651,6 @@ export const CommunityFeed: React.FC = () => {
                       </p>
                     )}
 
-                    {/* Reply Input Form */}
                     <div className="flex gap-2 pt-1">
                       <input
                         type="text"
@@ -522,6 +704,7 @@ export const CommunityFeed: React.FC = () => {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setActiveStory(null)}
                 className="text-xs font-bold text-gray-400 hover:text-gray-700 px-2 py-1 rounded-lg cursor-pointer"
               >
@@ -564,41 +747,129 @@ export const CommunityFeed: React.FC = () => {
                 </button>
               </div>
 
-              {/* Discussion / Comments Section */}
+              {/* Discussion / Comments Section with Direct Nested Threads */}
               <div className="space-y-3 pt-2 border-t border-gray-100">
                 <h5 className="text-xs font-black text-gray-800 flex items-center gap-1">
                   <span>💬</span> Syndicate Discussion ({activeStory.comments.length})
                 </h5>
 
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                  {activeStory.comments.map((comm) => (
-                    <div
-                      key={comm.id}
-                      className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100 text-xs space-y-0.5"
-                    >
-                      <div className="flex justify-between items-center">
-                        <strong className="text-gray-900 font-bold">{comm.author}</strong>
-                        <span className="text-[10px] text-gray-400">{comm.time}</span>
+                <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
+                  {activeStory.comments.map((comm) => {
+                    const replyCount = comm.replies?.length || 0;
+                    const isExpanded = !!expandedReplies[comm.id];
+                    const isReplyingToThis = activeCommentReplyId === comm.id;
+
+                    return (
+                      <div
+                        key={comm.id}
+                        className="p-3 rounded-2xl bg-gray-50/90 border border-gray-100 text-xs space-y-2 group transition"
+                      >
+                        {/* Parent Comment Header & Text */}
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <strong className="text-gray-900 font-bold">{comm.author}</strong>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-gray-400">{comm.time}</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setActiveCommentReplyId(isReplyingToThis ? null : comm.id)
+                                }
+                                className="text-[10px] font-bold text-[#a11635] hover:bg-[#fedde5] bg-[#fee9ee] px-2 py-0.5 rounded-md cursor-pointer transition"
+                              >
+                                {isReplyingToThis ? 'Cancel' : 'Reply'}
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-gray-700 leading-relaxed">{comm.text}</p>
+                        </div>
+
+                        {/* Toggle Bar: View / Hide Replies */}
+                        {replyCount > 0 && (
+                          <div className="pt-1">
+                            <button
+                              type="button"
+                              onClick={() => toggleExpandReplies(comm.id)}
+                              className="text-[11px] font-bold text-[#a11635] hover:underline flex items-center gap-1 cursor-pointer"
+                            >
+                              <span>{isExpanded ? '▲ Hide' : '▼ View'}</span>
+                              <span>
+                                {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+                              </span>
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Nested Replies List (Indented under parent) */}
+                        {isExpanded && replyCount > 0 && (
+                          <div className="pl-3 border-l-2 border-[#fcd5de] space-y-2 pt-1 mt-1">
+                            {comm.replies!.map((r) => (
+                              <div
+                                key={r.id}
+                                className="bg-white p-2.5 rounded-xl border border-[#fae2e7] shadow-2xs text-xs space-y-0.5"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <strong className="text-[10px] font-extrabold text-[#a11635]">
+                                    @{r.author}
+                                  </strong>
+                                  <span className="text-[9px] text-gray-400">{r.time}</span>
+                                </div>
+                                <p className="text-gray-600 leading-relaxed">{r.text}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Inline Reply Input Box under this specific comment */}
+                        {isReplyingToThis && (
+                          <div className="flex gap-2 pt-2 border-t border-gray-200/60 mt-2">
+                            <input
+                              type="text"
+                              value={inlineReplyText[comm.id] || ''}
+                              onChange={(e) =>
+                                setInlineReplyText((prev) => ({
+                                  ...prev,
+                                  [comm.id]: e.target.value,
+                                }))
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleAddNestedReply(comm.id);
+                                }
+                              }}
+                              placeholder={`Reply directly to @${comm.author}...`}
+                              className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-[#edd1d8] bg-white focus:ring-1 focus:ring-[#a11635] outline-none"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleAddNestedReply(comm.id)}
+                              className="px-3 py-1.5 bg-[#a11635] text-white font-bold text-xs rounded-xl hover:bg-[#850f29] transition cursor-pointer"
+                            >
+                              Post
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-gray-600">{comm.text}</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
-                {/* Comment Input */}
-                <form onSubmit={handleAddStoryComment} className="flex gap-2 pt-1">
+                {/* Top-Level Comment Input Form */}
+                <form onSubmit={handleAddStoryComment} className="flex gap-2 pt-2">
                   <input
                     type="text"
                     value={storyCommentInput}
                     onChange={(e) => setStoryCommentInput(e.target.value)}
-                    placeholder="Dispatch an executive insight or reply..."
+                    placeholder="Add to the main discussion..."
                     className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-[#edd1d8] focus:ring-1 focus:ring-[#a11635] outline-none bg-white"
                   />
                   <button
                     type="submit"
                     className="px-4 py-2 rounded-xl text-xs font-bold bg-[#a11635] text-white hover:bg-[#850f29] transition cursor-pointer"
                   >
-                    Reply
+                    Comment
                   </button>
                 </form>
               </div>
