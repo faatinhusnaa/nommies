@@ -1,0 +1,14 @@
+opencollection: 1.0.0
+
+info:
+  name: Robo Advisor API
+
+docs:
+  content: Robo Advisor Backend API Documentation
+  type: text/markdown
+bundled: false
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git

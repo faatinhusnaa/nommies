@@ -1,0 +1,46 @@
+info:
+  name: Update user by ID
+  type: http
+  seq: 7
+  tags:
+    - users
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/users/:id"
+  params:
+    - name: id
+      value: ""
+      type: path
+  body:
+    type: json
+    data: "{}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    request:
+      url: "{{baseUrl}}/users/:id"
+      method: PUT
+      params:
+        - name: id
+          value: ""
+          type: path
+      body:
+        type: json
+        data: "{}"
+    response:
+      status: 200
+      statusText: OK
+      body:
+        type: text
+        data: ""

@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* --- Perk Ladder Animations --- */
+@keyframes rainbow-glow {
+  0% {
+    filter: drop-shadow(0 0 6px rgba(255, 105, 180, 0.75));
+    background-position: 0% 50%;
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.85));
+    background-position: 100% 50%;
+  }
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 105, 180, 0.75));
+    background-position: 0% 50%;
+  }
+}
+
+.rainbow-nametag {
+  background: linear-gradient(90deg, #ff007f, #ff7b00, #ffea00, #00e676, #00b0ff, #d500f9, #ff007f);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-glow 3.5s ease infinite;
+}
+
+@keyframes float-halo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-float {
+  animation: float-halo 2.5s ease-in-out infinite;
+}
+
+@media print {
+  body {
+    background-color: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}

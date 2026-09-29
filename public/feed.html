@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nomnom • Live Feed</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body class="bg-neutral-950 text-neutral-100 min-h-screen p-6 md:p-12 font-sans">
+  <div class="max-w-3xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <header class="flex justify-between items-center border-b border-neutral-800 pb-6">
+      <div>
+        <h1 class="text-3xl font-extrabold text-white flex items-center gap-2">
+          nomnom <span class="text-emerald-400 text-sm font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30">live feed</span>
+        </h1>
+        <p class="text-xs text-neutral-400 mt-1">Post updates and watch them sync live across all clients</p>
+      </div>
+      <div id="statusBadge" class="text-xs px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/30">
+        Connecting...
+      </div>
+    </header>
+
+    <!-- Create Post Form -->
+    <form id="postForm" class="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-4 shadow-xl">
+      <h2 class="text-base font-semibold text-neutral-200">Create a New Post</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-neutral-400 mb-1">Author User ID</label>
+          <input 
+            type="number" 
+            id="userId" 
+            value="7" 
+            required 
+            class="w-full px-3 py-2 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-emerald-500" 
+          />
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-neutral-400 mb-1">Post Title</label>
+          <input 
+            type="text" 
+            id="title" 
+            placeholder="What's on your mind?" 
+            required 
+            class="w-full px-3 py-2 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-emerald-500" 
+          />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-neutral-400 mb-1">Content</label>
+        <textarea 
+          id="content" 
+          rows="3" 
+          placeholder="Share your thoughts or update..." 
+          required 
+          class="w-full px-3 py-2 rounded-xl bg-neutral-800 border border-neutral-700 text-sm text-white focus:outline-none focus:border-emerald-500 resize-none"
+        ></textarea>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <span id="formFeedback" class="text-xs text-neutral-400"></span>
+        <button 
+          type="submit" 
+          id="submitBtn" 
+          class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-semibold text-sm transition cursor-pointer disabled:opacity-50"
+        >
+          Publish Post
+        </button>
+      </div>
+    </form>
+
+    <!-- Posts Feed -->
+    <div class="space-y-4">
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-400">Live Stream</h2>
+      <div id="postsList" class="space-y-3">
+        <!-- Posts will dynamically append here -->
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    const socket = io(API_BASE);
+
+    const postsList = document.getElementById('postsList');
+    const postForm = document.getElementById('postForm');
+    const statusBadge = document.getElementById('statusBadge');
+    const formFeedback = document.getElementById('formFeedback');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Socket status updates
+    socket.on('connect', () => {
+      statusBadge.textContent = '● Live Connected';
+      statusBadge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+    });
+
+    socket.on('disconnect', () => {
+      statusBadge.textContent = '○ Disconnected';
+      statusBadge.className = 'text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30';
+    });
+
+    // Helper: render a single post card
+    function renderPostCard(post, prepend = false) {
+      const author = post.user?.name || `User #${post.user?.id || post.userId || '?'}`;
+      const card = document.createElement('div');
+      card.className = 'p-5 rounded-2xl bg-neutral-900 border border-neutral-800/80 transition hover:border-neutral-700 space-y-2';
+      card.innerHTML = `
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-white text-base">${escapeHtml(post.title)}</h3>
+          <span class="text-xs text-neutral-500">${escapeHtml(author)}</span>
+        </div>
+        <p class="text-sm text-neutral-300 leading-relaxed">${escapeHtml(post.content)}</p>
+      `;
+
+      if (prepend && postsList.firstChild) {
+        postsList.insertBefore(card, postsList.firstChild);
+      } else {
+        postsList.appendChild(card);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // 1. Listen for real-time created posts from WebSocket
+    socket.on('post:created', (newPost) => {
+      renderPostCard(newPost, true);
+    });
+
+    // 2. Fetch existing posts on load
+    async function loadExistingPosts() {
+      try {
+        const res = await fetch(`${API_BASE}/posts`);
+        const result = await res.json();
+        const posts = Array.isArray(result) ? result : (result.data || []);
+        postsList.innerHTML = '';
+        if (posts.length === 0) {
+          postsList.innerHTML = '<p class="text-xs text-neutral-500">No posts yet. Publish the first one above!</p>';
+        } else {
+          // Show newest on top
+          posts.reverse().forEach((p) => renderPostCard(p, false));
+        }
+      } catch (err) {
+        postsList.innerHTML = '<p class="text-xs text-rose-400">Failed to load posts feed.</p>';
+      }
+    }
+    loadExistingPosts();
+
+    // 3. Form submit event
+    postForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      formFeedback.textContent = 'Publishing...';
+      formFeedback.className = 'text-xs text-neutral-400';
+
+      const payload = {
+        userId: Number(document.getElementById('userId').value),
+        title: document.getElementById('title').value.trim(),
+        content: document.getElementById('content').value.trim(),
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/posts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Error creating post');
+        }
+
+        document.getElementById('title').value = '';
+        document.getElementById('content').value = '';
+        formFeedback.textContent = 'Published!';
+        formFeedback.className = 'text-xs text-emerald-400';
+        setTimeout(() => { formFeedback.textContent = ''; }, 3000);
+      } catch (err) {
+        formFeedback.textContent = err.message;
+        formFeedback.className = 'text-xs text-rose-400';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

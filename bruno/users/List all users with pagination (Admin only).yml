@@ -1,0 +1,71 @@
+info:
+  name: List all users with pagination (Admin only)
+  type: http
+  seq: 2
+  tags:
+    - users
+
+http:
+  method: GET
+  url: "{{baseUrl}}/users"
+  params:
+    - name: page
+      value: "1"
+      type: query
+      description: Page number (starts at 1)
+    - name: limit
+      value: "10"
+      type: query
+      description: Number of items per page
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    description: Paginated user records
+    request:
+      url: "{{baseUrl}}/users"
+      method: GET
+      params:
+        - name: page
+          value: "1"
+          type: query
+          description: Page number (starts at 1)
+        - name: limit
+          value: "10"
+          type: query
+          description: Number of items per page
+    response:
+      status: 200
+      statusText: OK
+      body:
+        type: text
+        data: ""
+  - name: 403 Response
+    description: Forbidden - requires ADMIN role
+    request:
+      url: "{{baseUrl}}/users"
+      method: GET
+      params:
+        - name: page
+          value: "1"
+          type: query
+          description: Page number (starts at 1)
+        - name: limit
+          value: "10"
+          type: query
+          description: Number of items per page
+    response:
+      status: 403
+      statusText: Forbidden
+      body:
+        type: text
+        data: ""

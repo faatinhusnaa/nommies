@@ -1,0 +1,56 @@
+info:
+  name: Delete a user by ID (Admin only)
+  type: http
+  seq: 8
+  tags:
+    - users
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/users/:id"
+  params:
+    - name: id
+      value: ""
+      type: path
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 204 Response
+    description: User deleted (No Content)
+    request:
+      url: "{{baseUrl}}/users/:id"
+      method: DELETE
+      params:
+        - name: id
+          value: ""
+          type: path
+    response:
+      status: 204
+      statusText: No Content
+      body:
+        type: text
+        data: ""
+  - name: 403 Response
+    description: Forbidden - requires ADMIN role
+    request:
+      url: "{{baseUrl}}/users/:id"
+      method: DELETE
+      params:
+        - name: id
+          value: ""
+          type: path
+    response:
+      status: 403
+      statusText: Forbidden
+      body:
+        type: text
+        data: ""

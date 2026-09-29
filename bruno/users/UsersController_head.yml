@@ -1,0 +1,40 @@
+info:
+  name: UsersController_head
+  type: http
+  seq: 5
+  tags:
+    - users
+
+http:
+  method: HEAD
+  url: "{{baseUrl}}/users/:id"
+  params:
+    - name: id
+      value: ""
+      type: path
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 200 Response
+    request:
+      url: "{{baseUrl}}/users/:id"
+      method: HEAD
+      params:
+        - name: id
+          value: ""
+          type: path
+    response:
+      status: 200
+      statusText: OK
+      body:
+        type: text
+        data: ""

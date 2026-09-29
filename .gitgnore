@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production Build Folders
+dist/
+build/
+*/dist/
+
+# Local Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Uploaded Media / Avatars
+uploads/
+*/uploads/
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*

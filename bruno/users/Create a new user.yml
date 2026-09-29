@@ -1,0 +1,38 @@
+info:
+  name: Create a new user
+  type: http
+  seq: 1
+  tags:
+    - users
+
+http:
+  method: POST
+  url: "{{baseUrl}}/users"
+  body:
+    type: json
+    data: "{}"
+  auth:
+    type: bearer
+    token: "{{token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
+
+examples:
+  - name: 201 Response
+    request:
+      url: "{{baseUrl}}/users"
+      method: POST
+      body:
+        type: json
+        data: "{}"
+    response:
+      status: 201
+      statusText: Created
+      body:
+        type: text
+        data: ""
