@@ -65,8 +65,11 @@ interface ManagedUser {
   name: string;
   email: string;
   role: string;
-  avatarUrl?: string;
   treat_points?: number;
+  treatPoints?: number;
+  points?: number;
+  avatar?: string;
+  riskProfile?: any;
 }
 
 export default function App() {
@@ -89,7 +92,7 @@ export default function App() {
   });
 
   // Dynamic Reward Tiers
-  const points = user?.treat_points || 0;
+  const points = user?.treat_points || user?.points || 0;
   const hasVipHalo = points >= 50;
   const hasRainbowNametag = points >= 100;
   const hasSugarOverlord = points >= 200;
@@ -138,6 +141,31 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('investor_tier', JSON.stringify(investorData));
   }, [investorData]);
+
+  // Synchronize authenticated user profile with latest database values
+  useEffect(() => {
+    const syncProfile = async () => {
+      const storedToken = localStorage.getItem('access_token');
+      if (!storedToken) return;
+
+      try {
+        const freshUser = await apiRequest('/users/me');
+        if (freshUser) {
+          const freshPts = freshUser.treat_points ?? freshUser.points ?? 0;
+          setUser((prev: any) => ({
+            ...prev,
+            ...freshUser,
+            treat_points: freshPts,
+            points: freshPts,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to sync profile on mount:', err);
+      }
+    };
+
+    syncProfile();
+  }, [token]);
 
   // --- Admin User Actions ---
   const loadAdminUsers = async () => {
@@ -202,10 +230,20 @@ export default function App() {
     }
   };
 
-  // --- Reset Points (Admin-Only) ---
-  const handleResetPoints = async (targetUserId: number, newPointTotal = 0) => {
-    if (!window.confirm(`Reset treat points for User #${targetUserId} to ${newPointTotal}?`)) {
-      return;
+  // --- Reset / Set Points (Admin-Only) ---
+  const handleResetPoints = async (targetUserId: number, initialPoints?: number) => {
+    let newPointTotal: number;
+
+    if (initialPoints !== undefined) {
+      newPointTotal = initialPoints;
+    } else {
+      const input = window.prompt(`Enter new treat points for User #${targetUserId}:`, "150");
+      if (input === null) return;
+      newPointTotal = parseInt(input, 10);
+      if (isNaN(newPointTotal)) {
+        alert("Please enter a valid numeric value.");
+        return;
+      }
     }
 
     try {
@@ -216,18 +254,26 @@ export default function App() {
       });
 
       if (user?.id === targetUserId) {
-        setUser((prev: any) => ({ ...prev, treat_points: newPointTotal }));
+        setUser((prev: any) => ({
+          ...prev,
+          treat_points: newPointTotal,
+          points: newPointTotal,
+        }));
       }
 
       setAdminUsers((prev) =>
-        prev.map((u) => (u.id === targetUserId ? { ...u, treat_points: newPointTotal } : u))
+        prev.map((u) =>
+          u.id === targetUserId
+            ? { ...u, treat_points: newPointTotal, points: newPointTotal }
+            : u
+        )
       );
 
       if (selectedUser?.id === targetUserId) {
-        setSelectedUser({ ...selectedUser, treat_points: newPointTotal });
+        setSelectedUser({ ...selectedUser, treat_points: newPointTotal, points: newPointTotal });
       }
 
-      alert(`Successfully reset points for User #${targetUserId}.`);
+      alert(`Successfully updated User #${targetUserId} points to ${newPointTotal} pts.`);
     } catch (err: any) {
       alert(`Failed to reset points: ${err.message || 'Unauthorized action'}`);
     }
@@ -269,7 +315,8 @@ export default function App() {
           avatarImage: '',
           avatarBg: '#fecdd3',
           treat_points: 0,
-          hasCompletedQuiz: false, // Forces onboarding quiz
+          points: 0,
+          hasCompletedQuiz: false,
         };
 
         setUser(registeredUser);
@@ -291,6 +338,7 @@ export default function App() {
 
         const cleanEmail = res.user.email.toLowerCase();
         const matchedAvatar = SANRIO_AVATARS.find(a => cleanEmail.includes(a.id));
+        const userPts = res.user.treat_points ?? res.user.points ?? 0;
 
         const loggedInUser = {
           id: res.user?.id,
@@ -300,7 +348,8 @@ export default function App() {
           avatarEmoji: matchedAvatar ? matchedAvatar.emoji : '🐶',
           avatarImage: '',
           avatarBg: matchedAvatar ? matchedAvatar.bg : '#fef08a',
-          treat_points: res.user.treat_points || 0,
+          treat_points: userPts,
+          points: userPts,
           hasCompletedQuiz: true,
         };
 
@@ -362,8 +411,8 @@ export default function App() {
   };
 
   // --- Quiz Submission & Tier Logic ---
-  const handleAnswerQuestion = async (points: number) => {
-    const nextScore = quizScore + points;
+  const handleAnswerQuestion = async (pointValue: number) => {
+    const nextScore = quizScore + pointValue;
 
     if (currentStep + 1 < DETAILED_QUIZ.length) {
       setQuizScore(nextScore);
@@ -463,7 +512,7 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setIsForgotModalOpen(true)}
-                    className="text-[10px] text-[#a11635] font-bold hover:underline"
+                    className="text-[10px] text-[#a11635] font-bold hover:underline cursor-pointer"
                   >
                     Forgot Passcode?
                   </button>
@@ -770,7 +819,7 @@ export default function App() {
               </button>
               {user.role === 'admin' && (
                 <button
-                  onClick={() => handleResetPoints(user.id, 0)}
+                  onClick={() => handleResetPoints(user.id)}
                   className="flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition text-center cursor-pointer"
                 >
                   Reset My Points
@@ -829,10 +878,15 @@ export default function App() {
         {/* Treat Points Rewards Component */}
         <div className="w-full">
           <TreatLoggerRewards
-            currentPoints={user?.treat_points || 0}
-            userName={user.name}
+            currentPoints={user?.treat_points ?? user?.points ?? 0}
+            userId={user?.id || user?.sub}
+            userName={user?.name}
             onUpdatePoints={(newPts) => {
-              setUser((prev: any) => ({ ...prev, treat_points: newPts }));
+              setUser((prev: any) => ({
+                ...prev,
+                treat_points: newPts,
+                points: newPts,
+              }));
             }}
           />
         </div>
@@ -1090,8 +1144,8 @@ export default function App() {
                           >
                             {u.role}
                           </span>
-                          <span className="text-[10px] font-bold text-[#a11635] bg-[#fff0f3] px-2 py-0.5 rounded-md border border-[#fcd5de]">
-                            {u.treat_points || 0} pts
+                          <span className="text-xs font-bold text-[#a11635] bg-[#ffeef2] px-2.5 py-0.5 rounded-full border border-[#fcd5de]">
+                            {u.treat_points ?? u.treatPoints ?? u.points ?? 0} pts
                           </span>
                         </div>
                         <span className="text-[11px] text-gray-500 block mt-0.5">
@@ -1117,9 +1171,9 @@ export default function App() {
                           Change to {u.role === 'admin' ? 'User' : 'Admin'}
                         </button>
                         <button
-                          onClick={() => handleResetPoints(u.id, 0)}
+                          onClick={() => handleResetPoints(u.id)}
                           className="px-2.5 py-1 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 rounded-lg transition cursor-pointer"
-                          title="Reset treat points to zero"
+                          title="Set treat points value"
                         >
                           Reset Pts
                         </button>
@@ -1146,7 +1200,7 @@ export default function App() {
                   </p>
                   <p className="text-[11px] text-gray-600">
                     Role: <strong className="text-gray-900">{selectedUser.role.toUpperCase()}</strong> | Points:{' '}
-                    <strong className="text-[#a11635]">{selectedUser.treat_points || 0}</strong>
+                    <strong className="text-[#a11635]">{selectedUser.treat_points ?? selectedUser.points ?? 0}</strong>
                   </p>
                 </div>
                 <button

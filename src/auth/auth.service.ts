@@ -104,6 +104,7 @@ export class AuthService {
         name: user.name,
         email: user.email,
         role: user.role,
+        treat_points: user.treat_points ?? 0,
       },
     };
   }

@@ -38,4 +38,6 @@ export class UpdateUserDto {
   @ValidateNested()
   @Type(() => UserAnswersDto)
   quiz?: UserAnswersDto;
+
+  
 }

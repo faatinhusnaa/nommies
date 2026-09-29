@@ -37,7 +37,7 @@ export class User {
   role: UserRole;
 
   // src/users/entities/user.entity.ts
-@Column({ type: 'int', default: 0 })
+@Column({ type: 'int', default: 0, name: 'treat_points' })
 treat_points: number;
 
   @CreateDateColumn()

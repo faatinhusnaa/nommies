@@ -36,21 +36,45 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
-  async findAll(paginationQuery?: any) {
-    const limit = paginationQuery?.limit || 10;
-    const page = paginationQuery?.page || 1;
-    const skip = paginationQuery?.offset ?? (page - 1) * limit;
+  // src/users/users.service.ts
+async findAll(paginationQuery?: any) {
+  const limit = paginationQuery?.limit || 50;
+  const page = paginationQuery?.page || 1;
+  const skip = paginationQuery?.offset ?? (page - 1) * limit;
 
-    const [items, total] = await this.userRepository.findAndCount({
-      relations: { riskProfile: true },
-      take: limit,
-      skip: skip,
-    });
+  // Use QueryBuilder to force-select the points column and avoid any TypeORM hydration drops
+  const query = this.userRepository
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.riskProfile', 'riskProfile')
+    .addSelect('user.treat_points') // explicitly forces loading the points column
+    .orderBy('user.id', 'ASC')
+    .take(limit)
+    .skip(skip);
 
-    return { items, total, limit, page };
-  }
+  const [rawUsers, total] = await query.getManyAndCount();
 
-  async getProfile(id: number) {
+  const mappedItems = rawUsers.map((u: any) => {
+    // Check every possible variation
+    const pts = Number(u.treat_points ?? u.treatPoints ?? u.points ?? 0);
+    return {
+      ...u,
+      treat_points: pts,
+      treatPoints: pts,
+      points: pts,
+    };
+  });
+
+  return {
+    items: mappedItems,
+    data: mappedItems,
+    total,
+    limit,
+    page,
+    totalPages: Math.ceil(total / limit),
+  };
+}
+
+  async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: { riskProfile: true },
@@ -59,6 +83,28 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;
+  }
+
+  async getProfile(id: number): Promise<User> {
+    return this.findOne(id);
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(id);
+
+    if (updateUserDto.name) {
+      user.name = updateUserDto.name;
+    }
+
+    if (updateUserDto.role) {
+      user.role = updateUserDto.role as UserRole;
+    }
+
+    if (updateUserDto.password) {
+      user.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    return await this.userRepository.save(user);
   }
 
   async updateProfile(
@@ -73,7 +119,6 @@ export class UsersService {
     ) {
       throw new ForbiddenException('You can only update your own profile');
     }
-    
 
     const user = await this.userRepository
       .createQueryBuilder('user')
@@ -113,7 +158,7 @@ export class UsersService {
       ) {
         throw new ForbiddenException('Only administrators can change roles');
       }
-      user.role = dto.role;
+      user.role = dto.role as UserRole;
     }
 
     const savedUser = await this.userRepository.save(user);
@@ -137,36 +182,42 @@ export class UsersService {
       await this.riskProfileRepository.save(profile);
     }
 
-    return this.getProfile(savedUser.id);
+    return this.findOne(savedUser.id);
   }
 
-  async remove(id: number) {
-    const user = await this.getProfile(id);
+  async remove(id: number): Promise<void> {
+    const user = await this.findOne(id);
     await this.userRepository.remove(user);
   }
 
-  // src/users/users.service.ts
-async logTreat(userId: number, treatName: string, pointsEarned: number = 25) {
+  async logTreat(userId: number, treatName: string, pointsEarned: number) {
   const user = await this.userRepository.findOne({ where: { id: userId } });
-  if (!user) throw new NotFoundException('Executive not found');
+  if (!user) {
+    throw new NotFoundException(`User #${userId} not found`);
+  }
 
-  user.treat_points = (user.treat_points || 0) + pointsEarned;
+  // Add points to current total
+  user.treat_points = (Number(user.treat_points) || 0) + Number(pointsEarned);
+  
   await this.userRepository.save(user);
 
   return {
-    message: `Logged ${treatName}! Gained ${pointsEarned} Treat Points ✨`,
+    success: true,
+    treatName,
+    pointsAdded: pointsEarned,
     currentPoints: user.treat_points,
   };
 }
 
-// backend/src/users/users.service.ts
-async updatePoints(userId: number, points: number) {
-  const user = await this.userRepository.findOne({ where: { id: userId } });
-  if (!user) throw new NotFoundException('Target user not found');
-  
-  user.treat_points = points;
-  return this.userRepository.save(user);
-}
+  async resetPoints(userId: number, points: number = 0): Promise<User> {
+    const user = await this.findOne(userId);
+    user.treat_points = points;
+    return await this.userRepository.save(user);
+  }
+
+  async updatePoints(userId: number, points: number): Promise<User> {
+    return this.resetPoints(userId, points);
+  }
 
   private calculateRisk(answers: UserAnswersDto): { score: number; tier: RiskTier } {
     const horizonScore = QUIZ_SCORE_MAP.time_horizon[answers.time_horizon] ?? 0;
@@ -184,12 +235,9 @@ async updatePoints(userId: number, points: number) {
     return { score: total, tier };
   }
 
-  async updateAvatar(userId: number, avatarUrl: string) {
-    const user = await this.getProfile(userId);
+  async updateAvatar(userId: number, avatarUrl: string): Promise<User> {
+    const user = await this.findOne(userId);
     user.avatar = avatarUrl;
-    await this.userRepository.save(user);
-    return user;
+    return await this.userRepository.save(user);
   }
-
 }
-

@@ -9,6 +9,13 @@ export interface Reward {
   actionText: string;
 }
 
+export interface TreatLoggerRewardsProps {
+  currentPoints: number;
+  onUpdatePoints: (newPoints: number) => void;
+  userId?: number;
+  userName?: string;
+}
+
 export const REWARDS_LIST: Reward[] = [
   {
     id: 'halo',
@@ -51,30 +58,51 @@ const TREAT_OPTIONS = [
   { name: 'Matcha Softserve', points: 35, icon: '🍦' },
 ];
 
-interface TreatLoggerProps {
-  currentPoints: number;
-  userName?: string;
-  onUpdatePoints: (newPoints: number) => void;
-}
-
-export const TreatLoggerRewards: React.FC<TreatLoggerProps> = ({
+export const TreatLoggerRewards: React.FC<TreatLoggerRewardsProps> = ({
   currentPoints,
-  userName = 'Executive Tycoon',
   onUpdatePoints,
+  //userId,
+  userName = 'Executive Tycoon',
 }) => {
+  const [status, setStatus] = useState<string | null>(null);
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>('');
 
-  const handleLogTreat = (treat: (typeof TREAT_OPTIONS)[0]) => {
-    const updated = currentPoints + treat.points;
-    onUpdatePoints(updated);
-    setStatus(`+${treat.points} pts added! Enjoy the ${treat.name}! ✨`);
-    setTimeout(() => setStatus(''), 2500);
+  const handleLogTreat = async (treatName: string, ptsEarned: number) => {
+    try {
+      const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+      const res = await fetch('/users/me/treats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ treatName, points: ptsEarned }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const serverPoints = data.currentPoints ?? ((currentPoints || 0) + ptsEarned);
+        onUpdatePoints(serverPoints);
+        setStatus(`Logged ${treatName}! +${ptsEarned} pts`);
+      } else {
+        // Fallback local update if offline
+        const fallback = (currentPoints || 0) + ptsEarned;
+        onUpdatePoints(fallback);
+        setStatus(`Logged ${treatName}! +${ptsEarned} pts`);
+      }
+    } catch (err) {
+      console.error('Failed to log treat:', err);
+      const fallback = (currentPoints || 0) + ptsEarned;
+      onUpdatePoints(fallback);
+    }
+
+    setTimeout(() => setStatus(null), 3000);
   };
 
   const nextReward =
     REWARDS_LIST.find((r) => r.pointsNeeded > currentPoints) ||
     REWARDS_LIST[REWARDS_LIST.length - 1];
+
   const progressPercent = Math.min(
     100,
     Math.round((currentPoints / nextReward.pointsNeeded) * 100)
@@ -133,7 +161,7 @@ export const TreatLoggerRewards: React.FC<TreatLoggerProps> = ({
           {TREAT_OPTIONS.map((item, idx) => (
             <button
               key={idx}
-              onClick={() => handleLogTreat(item)}
+              onClick={() => handleLogTreat(item.name, item.points)}
               className="p-3 bg-[#fffcfd] border border-[#f8d7df] hover:border-[#a11635] hover:bg-[#ffeef2] rounded-2xl transition flex flex-col items-center gap-1 active:scale-95 cursor-pointer shadow-2xs"
             >
               <span className="text-2xl">{item.icon}</span>

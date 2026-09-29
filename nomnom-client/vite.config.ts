@@ -1,33 +1,38 @@
+// nomnom-client/vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite'; // <--- 1. Import this
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
     react(),
-    tailwindcss(), // <--- 2. Add this here
+    tailwindcss(), // <--- Restores Tailwind v4 styles
   ],
   server: {
-    host: true,
     port: 5173,
+    host: true,
     allowedHosts: ['fifty-doorpost-giddily.ngrok-free.dev',
       '.ngrok-free.dev',
-    ], // Allows ngrok
+    ],
     proxy: {
-      '/posts': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
       '/auth': {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/users': {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+      },
+      '/posts': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+      },
+      '/portfolio': {
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://localhost:8080',
+        target: 'http://127.0.0.1:8080',
         ws: true,
         changeOrigin: true,
       },
