@@ -1,6 +1,0 @@
-info:
-  name: users
-  type: folder
-
-request:
-  auth: inherit
