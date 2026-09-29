@@ -837,7 +837,7 @@ export default function App() {
           {/* Investor Tier Card */}
           <div className="bg-[#fff1f4] border border-[#fcd5de] rounded-3xl p-5 sm:p-6 text-center space-y-4">
             <span className="inline-block text-[11px] font-bold text-[#a11635] bg-white px-3 py-1 rounded-full border border-[#fad2db] shadow-xs">
-              Executive Snack Tier
+              Executive Nommies Tier
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-[#a11635] tracking-tight">{investorData.tier}</h3>
             <p className="text-xs text-gray-600 max-w-lg mx-auto font-medium">
