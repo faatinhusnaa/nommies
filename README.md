@@ -83,15 +83,24 @@ Dashboard boots up at `http://localhost:5173`.
 | :--- | :--- | :--- | :--- |
 | `POST` | `/auth/register` | Public | Create tycoon account |
 | `POST` | `/auth/login` | Public | Grab JWT token |
+| `POST` | `/auth/reset-password` | Public | Reset forgotten passcodes |
+| `GET` | `/auth/quiz` | Public | Fetch risk quiz questions |
 | `GET` | `/users/me` | User | Get current profile & points |
-| `PATCH` | `/users/me` | User | Update handle / passcode |
+| `PATCH` | `/users/me` | User | Update display credentials / password |
 | `PATCH` | `/users/me/avatar` | User | Upload avatar image (multipart) |
-| `GET` | `/users` | Admin | List all registered accounts |
-| `PATCH` | `/users/:id/reset-points` | Admin | Wipe or set points |
-| `GET` | `/posts` | User | Fetch live dispatches |
+| `GET` | `/users` | Admin | Paginated list of registered accounts |
+| `POST` | `/users` | Admin | Create user directly |
+| `GET` | `/users/:id` | User/Admin | Inspect specific user account |
+| `PATCH` | `/users/:id` | Admin | Update user role or profile details |
+| `DELETE` | `/users/:id` | Admin | Permanently purge an account |
+| `PATCH` | `/users/:id/reset-points` | Admin | Wipe or set treat points |
+| `GET` | `/portfolio/recommended` | User | Fetch model portfolio allocation weights |
+| `GET` | `/posts` | Public/User | Fetch all live dispatches |
 | `POST` | `/posts` | User | Drop a new wire bulletin |
-| `POST` | `/posts/:id/vote` | User | Upvote / downvote dispatch |
+| `GET` | `/posts/:id` | User | Inspect a specific dispatch |
+| `POST` | `/posts/:id/vote` | User | Upvote or downvote a dispatch |
 | `POST` | `/posts/:id/replies` | User | Drop a reply in the thread |
+| `DELETE` | `/posts/:id` | User/Admin | Remove a wire bulletin |
 
 ---
 
