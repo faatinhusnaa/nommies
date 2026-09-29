@@ -106,4 +106,4 @@ Dashboard boots up at `http://localhost:5173`.
 
 ## 📄 License
 
-MIT. Go build your empire.
+MIT. HAPPY NOMMIES GUYS!!!!!!!!!!!!!!
